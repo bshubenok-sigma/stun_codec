@@ -112,6 +112,33 @@ mod message;
 mod method;
 mod transaction_id;
 
+cfg_if::cfg_if! {
+    if #[cfg(feature = "mbedtls")] {
+        use mbedtls::{hash::{Hmac, Md, Type}};
+        pub(crate) fn hmac_sha1(key: &[u8], message: &[u8]) -> [u8; 20] {
+            let mut out: [u8; 20] = [0; 20];
+            let mut signer = Hmac::new(Type::Sha1, key).unwrap();
+            signer.update(message).unwrap();
+            signer.finish(&mut out).unwrap();
+            out
+        }
+
+        pub(crate) fn compute_md5(data: &[u8]) -> [u8; 16] {
+            let mut out: [u8; 16] = [0; 16];
+            let mut hasher = Md::new(Type::Md5).unwrap();
+            hasher.update(data).unwrap();
+            hasher.finish(&mut out).unwrap();
+            out
+        }
+    } else if #[cfg(feature = "native_hash")] {
+        pub(crate) use hmacsha1::hmac_sha1;
+
+        pub(crate) fn compute_md5(data: &[u8]) -> [u8; 16] {
+            md5::compute(data).0
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use bytecodec::{DecodeExt, EncodeExt, Error};

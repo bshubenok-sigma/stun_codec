@@ -12,12 +12,20 @@ license = "MIT"
 edition = "2021"
 
 [badges]
-coveralls = {repository = "sile/stun_codec"}
+coveralls = { repository = "sile/stun_codec" }
 
 [dependencies]
 bytecodec = "0.4"
 byteorder = "1"
+cfg-if = "1.0.0"
 crc = "3"
-hmac-sha1 = "0.1"
-md5 = "0.7"
+hmac-sha1 = { version = "0.1", optional = true }
+mbedtls = { git = "https://github.com/bshubenok-sigma/rust-mbedtls", branch = "dtls-srtp", default-features = false, features = ["std", "time", "async"] }
+mbedtls-sys-espidf = { git = "https://github.com/bshubenok-sigma/rust-mbedtls", branch = "dtls-srtp" }
+md5 = { version = "0.7", optional = true }
 trackable = "1"
+
+[features]
+default = ["mbedtls"]
+mbedtls = []
+native_hash = ["hmac-sha1", "md5"]

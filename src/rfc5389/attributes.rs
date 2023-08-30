@@ -5,6 +5,7 @@ use crate::attribute::{Attribute, AttributeType};
 use crate::message::{Message, MessageEncoder};
 use crate::net::{socket_addr_xor, SocketAddrDecoder, SocketAddrEncoder};
 use crate::rfc5389::errors;
+use crate::{compute_md5, hmac_sha1};
 use bytecodec::bytes::{BytesEncoder, CopyableBytesDecoder, Utf8Decoder, Utf8Encoder};
 use bytecodec::combinator::{Collect, PreEncode, Repeat};
 use bytecodec::fixnum::{U16beDecoder, U16beEncoder, U32beDecoder, U32beEncoder};
@@ -14,7 +15,6 @@ use bytecodec::{
     TryTaggedDecode,
 };
 use byteorder::{BigEndian, ByteOrder};
-use hmacsha1::hmac_sha1;
 use std::borrow::Cow;
 use std::net::SocketAddr;
 use std::vec;
@@ -399,9 +399,9 @@ impl MessageIntegrity {
         A: Attribute,
     {
         let key =
-            md5::compute(format!("{}:{}:{}", username.name(), realm.text(), password).as_bytes());
-        let preceding_message_bytes = track!(Self::message_into_bytes(message.clone()))?;
-        let hmac_sha1 = hmac_sha1(&key.0[..], &preceding_message_bytes);
+            compute_md5(format!("{}:{}:{}", username.name(), realm.text(), password).as_bytes());
+        let preceding_message_bytes: Vec<u8> = track!(Self::message_into_bytes(message.clone()))?;
+        let hmac_sha1 = hmac_sha1(&key[..], &preceding_message_bytes);
         Ok(MessageIntegrity {
             hmac_sha1,
             preceding_message_bytes,
@@ -430,8 +430,8 @@ impl MessageIntegrity {
         password: &str,
     ) -> std::result::Result<(), ErrorCode> {
         let key =
-            md5::compute(format!("{}:{}:{}", username.name(), realm.text(), password).as_bytes());
-        let expected = hmac_sha1(&key.0[..], &self.preceding_message_bytes);
+            compute_md5(format!("{}:{}:{}", username.name(), realm.text(), password).as_bytes());
+        let expected = hmac_sha1(&key[..], &self.preceding_message_bytes);
         if self.hmac_sha1 == expected {
             Ok(())
         } else {
