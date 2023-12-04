@@ -20,8 +20,8 @@ byteorder = "1"
 cfg-if = "1.0.0"
 crc = "3"
 hmac-sha1 = { version = "0.1", optional = true }
-mbedtls = { git = "https://github.com/bshubenok-sigma/rust-mbedtls", branch = "dtls-srtp", default-features = false, features = ["std", "time", "async"] }
-mbedtls-sys-espidf = { git = "https://github.com/bshubenok-sigma/rust-mbedtls", branch = "dtls-srtp" }
+mbedtls = { git = "https://github.com/bshubenok-sigma/rust-mbedtls", branch = "esp_idf_5.1", default-features = false, features = ["std", "time", "async"] }
+mbedtls-sys-espidf = { git = "https://github.com/bshubenok-sigma/rust-mbedtls", branch = "esp_idf_5.1" }
 md5 = { version = "0.7", optional = true }
 trackable = "1"
 
